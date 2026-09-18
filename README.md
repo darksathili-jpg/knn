@@ -1,39 +1,52 @@
-# KNN // AI LAB — Première NSI
+# KNN // Decision Lab — Première NSI
 
-Laboratoire web interactif pour découvrir le **machine learning** à travers l'algorithme des **k plus proches voisins (KNN)**, avec un positionnement explicite par rapport au programme de Première NSI.
+Support web interactif pour découvrir le **machine learning supervisé** à travers l'algorithme des **k plus proches voisins (KNN)**, avec un positionnement explicite par rapport au programme officiel de Première NSI.
 
-## Objectifs pédagogiques
+## Intention pédagogique
 
-Le support permet de réinvestir des notions du programme de Première NSI : listes, dictionnaires, fonctions, parcours de données, calculs, tri et algorithmique. KNN est présenté comme une ouverture vers l'apprentissage automatique, et non comme une notion explicitement exigible du programme.
+Le projet ne présente pas KNN comme une « boîte noire ». L'élève suit une progression :
 
-## Fonctionnalités
+**représenter → mesurer → trier → choisir k → voter → évaluer → coder**
 
-- visualisation interactive de deux classes de données ;
-- déplacement du point à classer à la souris, au toucher ou au clavier ;
-- choix dynamique de `k` ;
-- affichage des distances et des `k` voisins sélectionnés ;
-- vote et prédiction en temps réel ;
-- frontière de décision optionnelle ;
-- traduction progressive vers un algorithme Python sans bibliothèque de machine learning ;
-- micro-défi de prédiction ;
-- quiz avec correction immédiate et progression locale ;
-- mode clair / sombre ;
-- responsive et utilisable sur GitHub Pages ;
-- aucune dépendance externe.
+KNN n'est pas une notion explicitement exigible en Première NSI ; le support l'utilise comme terrain d'application pour les tableaux, dictionnaires, fonctions, parcours, tri, traitement de données, tests et raisonnement algorithmique.
 
-## Utilisation
+## V2 — Decision Lab
 
-Ouvrir simplement `index.html` dans un navigateur moderne.
+La V2 ajoute notamment :
 
-Le site est également conçu pour être publié automatiquement avec **GitHub Pages** via le workflow présent dans `.github/workflows/pages.yml`.
+- un parcours de maîtrise en 6 compétences avec progression locale ;
+- un exemple entièrement guidé avant le travail autonome ;
+- un laboratoire multi-jeux de données : drones, rôles de jeu et **Iris réel** ;
+- distances euclidienne et de Manhattan ;
+- vote uniforme ou pondéré par la distance ;
+- visualisation correcte du voisinage selon la métrique et la normalisation ;
+- frontières de décision dynamiques ;
+- mode « hypothèse avant réponse » ;
+- démonstration interactive du **piège des échelles** ;
+- normalisation par z-score ;
+- protocole rigoureux **apprentissage / validation / test** sur Iris ;
+- courbe de précision selon k ;
+- matrice de confusion sur le jeu de test ;
+- exercice de reconstruction du code Python ;
+- entraînement mixte avec feedback explicatif et carte de maîtrise ;
+- accessibilité clavier, mode clair/sombre et respect de `prefers-reduced-motion`.
 
-## Références
+## Ressources
 
-- Programme officiel de Première NSI — Bulletin officiel / Éduscol
-- Documentation scikit-learn sur les k plus proches voisins
-- WCAG 2.2
+- `index.html` — application complète ;
+- `assets/iris_2d.csv` — les 150 iris, avec longueur et largeur de sépale ;
+- `assets/knn_a_completer.py` — exercice Python sans bibliothèque de machine learning ;
+- `.github/workflows/pages.yml` — déploiement GitHub Pages.
+
+## Références principales
+
+- Programme officiel NSI Première — Bulletin officiel spécial n°1 du 22 janvier 2019
+- scikit-learn — KNeighborsClassifier et exemple Nearest Neighbors Classification
 - CAST Universal Design for Learning Guidelines 3.0
+- WCAG 2.2
 
-## Licence pédagogique
+## Déploiement
 
-Support destiné en priorité à un usage pédagogique en spécialité NSI.
+Le dépôt est prévu pour être servi par GitHub Pages via GitHub Actions.
+
+Site : https://darksathili-jpg.github.io/knn/
