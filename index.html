@@ -1,1 +1,792 @@
-The requested file reference is not currently visible. Use files.search or files.list to rediscover the file, then retry with a returned ref_id or file_id.
+<!doctype html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<meta name="description" content="KNN Decision Lab — cours interactif de Première NSI pour comprendre, expérimenter, coder et évaluer l'algorithme des k plus proches voisins.">
+<title>KNN // Decision Lab — Première NSI</title>
+<style>
+:root{
+ --bg:#07101b;--bg2:#0b1726;--panel:rgba(12,25,42,.88);--panel2:#102136;
+ --text:#f3f7fb;--muted:#a9b9ca;--line:#29435c;--cyan:#54e8ff;--cyan2:#13b9d7;
+ --amber:#ffbd62;--violet:#a58aff;--green:#57e6a5;--red:#ff7f91;--blue:#77a8ff;
+ --shadow:0 22px 60px rgba(0,0,0,.3);--r:22px;--focus:#fff36e;
+}
+html[data-theme="light"]{
+ --bg:#eef5fb;--bg2:#f7fbff;--panel:rgba(255,255,255,.94);--panel2:#fff;
+ --text:#102033;--muted:#52667a;--line:#c8d7e4;--cyan:#006f85;--cyan2:#005c70;
+ --amber:#8b4500;--violet:#5b42b7;--green:#08784e;--red:#b91e44;--blue:#295fae;
+ --shadow:0 20px 46px rgba(41,73,102,.12);--focus:#6d28d9;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+ margin:0;color:var(--text);background:
+ radial-gradient(circle at 80% 5%,rgba(165,138,255,.14),transparent 25rem),
+ radial-gradient(circle at 8% 30%,rgba(84,232,255,.10),transparent 27rem),
+ linear-gradient(rgba(84,232,255,.045) 1px,transparent 1px),
+ linear-gradient(90deg,rgba(84,232,255,.045) 1px,transparent 1px),var(--bg);
+ background-size:auto,auto,34px 34px,34px 34px,auto;
+ font:16px/1.58 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif
+}
+button,input,select{font:inherit}
+button,a,input,select,[tabindex]{outline:none}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+button{min-height:44px}
+a{color:var(--cyan)}
+.shell{width:min(1220px,calc(100% - 32px));margin:auto}
+.topbar{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 84%,transparent);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}
+.topbar .inner{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.brand{display:flex;gap:11px;align-items:center;font-weight:950;letter-spacing:.05em}
+.logo{width:39px;height:39px;display:grid;place-items:center;border:1px solid var(--cyan);border-radius:11px;background:linear-gradient(135deg,rgba(84,232,255,.1),rgba(165,138,255,.12))}
+.brand small{display:block;color:var(--muted);font-size:.67rem;letter-spacing:.11em}
+.top-actions{display:flex;gap:8px;align-items:center}
+.btn,.chip,.dataset-btn,.answer,.step-btn{
+ border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text);
+ padding:10px 14px;cursor:pointer;transition:.18s ease
+}
+.btn:hover,.dataset-btn:hover,.answer:hover,.step-btn:hover{border-color:var(--cyan);transform:translateY(-1px)}
+.btn.primary{background:linear-gradient(135deg,var(--cyan),var(--violet));color:#06131f;border:0;font-weight:900}
+html[data-theme="light"] .btn.primary{color:#fff}
+.btn.small{padding:7px 10px;min-height:38px}
+.progress-pill{font:800 .72rem ui-monospace,monospace;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:7px 10px}
+.hero{padding:86px 0 56px}
+.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:42px;align-items:center}
+.eyebrow,.kicker{font:850 .75rem ui-monospace,SFMono-Regular,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan)}
+.eyebrow{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:999px;padding:7px 11px;background:var(--panel)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 5px color-mix(in srgb,var(--green) 14%,transparent)}
+h1{font-size:clamp(3.2rem,8vw,7rem);line-height:.87;letter-spacing:-.065em;margin:20px 0 24px}
+h1 em{font-style:normal;color:transparent;-webkit-text-stroke:1px var(--cyan);text-shadow:0 0 30px rgba(84,232,255,.08)}
+.lead{font-size:clamp(1.08rem,2vw,1.38rem);color:var(--muted);max-width:780px}
+.cta{display:flex;gap:11px;flex-wrap:wrap;margin-top:26px}
+.hero-console{padding:22px;position:relative;overflow:hidden}
+.hero-console:before{content:"";position:absolute;inset:-30%;background:conic-gradient(from 45deg,transparent,rgba(84,232,255,.07),transparent,rgba(165,138,255,.07),transparent);animation:spin 18s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.console-inner{position:relative;z-index:1}
+.path{display:grid;gap:9px;margin-top:18px}
+.path-row{display:grid;grid-template-columns:38px 1fr auto;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:13px;background:color-mix(in srgb,var(--bg2) 76%,transparent)}
+.path-row b{font-size:.94rem}.path-row span{color:var(--muted);font-size:.78rem}
+.path-n{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:rgba(84,232,255,.09);color:var(--cyan);font:900 .8rem ui-monospace,monospace}
+.section{padding:62px 0}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:26px;margin-bottom:26px}
+h2{font-size:clamp(2.15rem,4.8vw,4.15rem);line-height:.98;letter-spacing:-.05em;margin:9px 0}
+.section-head p{max-width:600px;color:var(--muted);margin:0}
+.panel{border:1px solid var(--line);background:linear-gradient(145deg,var(--panel),color-mix(in srgb,var(--panel2) 75%,transparent));box-shadow:var(--shadow);border-radius:var(--r)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.card{padding:23px}.card p{color:var(--muted);margin-bottom:0}.card h3{margin:8px 0}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid var(--line);border-radius:999px;font:800 .7rem ui-monospace,monospace;color:var(--muted)}
+.badge.good{color:var(--green)}.badge.warn{color:var(--amber)}.badge.adv{color:var(--violet)}
+.callout{border-left:3px solid var(--cyan);padding:14px 16px;border-radius:0 12px 12px 0;background:color-mix(in srgb,var(--cyan) 7%,transparent);color:var(--muted)}
+.warning{border-left-color:var(--amber);background:color-mix(in srgb,var(--amber) 7%,transparent)}
+.mastery{display:grid;grid-template-columns:repeat(6,1fr);gap:9px}
+.mastery-item{padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel);min-height:112px}
+.mastery-item strong{display:block;margin:6px 0}.mastery-item span{font-size:.76rem;color:var(--muted)}
+.mastery-item.done{border-color:color-mix(in srgb,var(--green) 55%,var(--line));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--green) 12%,transparent)}
+.icon{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);display:grid;place-items:center;color:var(--cyan);font:900 .9rem ui-monospace,monospace}
+.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:16px}
+.flow .f{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel);position:relative}
+.flow .f:not(:last-child):after{content:"→";position:absolute;right:-10px;top:50%;transform:translate(50%,-50%);color:var(--violet);font-weight:900;z-index:2}
+.flow b{display:block;color:var(--text);margin:5px 0}.flow span{color:var(--muted);font-size:.8rem}
+.worked{padding:20px}
+.worked-layout{display:grid;grid-template-columns:.85fr 1.15fr;gap:18px}
+.mini-plane{position:relative;min-height:350px;border:1px solid var(--line);border-radius:17px;background:color-mix(in srgb,var(--bg2) 80%,transparent);overflow:hidden}
+.mini-plane svg{width:100%;height:auto;display:block}
+.work-step{padding:17px;border:1px solid var(--line);border-radius:14px;margin-bottom:10px;background:color-mix(in srgb,var(--bg) 40%,transparent)}
+.work-step.active{border-color:var(--cyan);background:color-mix(in srgb,var(--cyan) 8%,transparent)}
+.work-step code{color:var(--amber);font:800 .92rem ui-monospace,monospace}
+.lab{padding:17px}
+.lab-layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(320px,.75fr);gap:17px}
+.viz{padding:15px;border:1px solid var(--line);border-radius:17px;background:color-mix(in srgb,var(--bg2) 83%,transparent)}
+.dataset-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.dataset-btn.active{border-color:var(--cyan);background:color-mix(in srgb,var(--cyan) 9%,var(--panel))}
+.dataset-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px;color:var(--muted);font-size:.83rem}
+#plot{width:100%;height:auto;display:block;touch-action:none;cursor:crosshair;border-radius:13px}
+.tick{font:600 11px ui-monospace,monospace;fill:var(--muted)}.axis{font:800 13px ui-sans-serif,system-ui;fill:var(--muted)}
+.legend{display:flex;gap:13px;flex-wrap:wrap;font-size:.78rem;color:var(--muted);margin:8px 0}
+.sw{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
+.controls{padding:19px;display:flex;flex-direction:column;gap:14px}
+.controls h3{margin:0;font-size:1rem}
+.control{padding-top:13px;border-top:1px solid var(--line)}
+.control:first-child{padding-top:0;border-top:0}
+.row{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.big{font:950 1.8rem ui-monospace,monospace;color:var(--cyan)}
+input[type=range]{width:100%;min-height:38px;accent-color:var(--cyan)}
+.select{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg2);color:var(--text)}
+.toggle{display:flex;align-items:center;gap:9px;margin:7px 0;color:var(--muted)}
+.toggle input{width:20px;height:20px;accent-color:var(--cyan)}
+.predbox{padding:14px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(135deg,rgba(165,138,255,.11),rgba(84,232,255,.06))}
+.predbox strong{display:block;font-size:1.35rem;margin-top:5px}
+.challenge-options{display:grid;gap:7px;margin-top:10px}
+.answer{text-align:left}
+.answer.selected{border-color:var(--violet);background:color-mix(in srgb,var(--violet) 10%,var(--panel))}
+.answer.correct{border-color:var(--green);background:color-mix(in srgb,var(--green) 10%,var(--panel))}
+.answer.wrong{border-color:var(--red);background:color-mix(in srgb,var(--red) 8%,var(--panel))}
+.feedback{min-height:54px;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--bg) 55%,transparent);color:var(--muted);margin-top:10px}
+.table-wrap{overflow:auto;max-height:340px}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th,td{padding:8px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-size:.69rem;letter-spacing:.07em;text-transform:uppercase}
+.formula-box{margin-top:12px;padding:14px;border:1px solid var(--line);border-radius:13px;background:color-mix(in srgb,var(--bg) 55%,transparent);font:700 .85rem ui-monospace,monospace;color:var(--muted)}
+.formula-box strong{color:var(--text)}
+.trap{padding:20px}
+.trap-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.compare-card{padding:17px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.compare-card strong{font-size:1.15rem}.compare-card .winner{font-size:1.4rem;color:var(--cyan);display:block;margin-top:8px}
+.eval{padding:20px}
+.eval-grid{display:grid;grid-template-columns:1.3fr .7fr;gap:18px}
+.chartbox{padding:14px;border:1px solid var(--line);border-radius:16px;background:color-mix(in srgb,var(--bg2) 80%,transparent)}
+#accChart{width:100%;height:auto;display:block}
+.metric-card{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel);margin-bottom:10px}
+.metric-card b{font-size:1.55rem;color:var(--cyan)}
+.matrix{display:grid;grid-template-columns:auto repeat(3,1fr);gap:4px;margin-top:12px}
+.matrix div{padding:8px;border:1px solid var(--line);border-radius:8px;text-align:center;font-size:.8rem}
+.matrix .head{color:var(--muted);background:color-mix(in srgb,var(--bg) 55%,transparent)}
+.code-lab{display:grid;grid-template-columns:1.15fr .85fr;gap:17px}
+.code-card{overflow:hidden}
+.code-head{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+pre{margin:0;padding:18px;overflow:auto;background:color-mix(in srgb,var(--bg) 72%,transparent);font:14px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace}
+.blank{width:72px;padding:3px 6px;border-radius:6px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font:inherit}
+.practice{padding:21px}
+.practice-layout{display:grid;grid-template-columns:1fr .35fr;gap:18px}
+.qtitle{font-size:1.2rem;font-weight:900;margin:9px 0 14px}
+.answers{display:grid;gap:8px}
+.domain{margin-bottom:12px}.domain-head{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted)}
+.bar{height:8px;background:var(--line);border-radius:999px;overflow:hidden}.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--violet));width:0}
+.sources{padding:23px;color:var(--muted);font-size:.9rem}
+.sources li{margin:8px 0}
+footer{border-top:1px solid var(--line);padding:42px 0 70px;color:var(--muted);margin-top:40px}
+footer .frow{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.toast{position:fixed;right:18px;bottom:18px;z-index:100;padding:12px 15px;border:1px solid var(--line);background:var(--panel2);box-shadow:var(--shadow);border-radius:12px;transform:translateY(150%);transition:.2s}
+.toast.show{transform:none}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:960px){
+ .hero-grid,.worked-layout,.lab-layout,.eval-grid,.code-lab,.practice-layout,.trap-grid{grid-template-columns:1fr}
+ .mastery{grid-template-columns:repeat(3,1fr)}.grid4{grid-template-columns:1fr 1fr}.flow{grid-template-columns:1fr}.flow .f:after{display:none}
+}
+@media(max-width:620px){
+ .shell{width:min(100% - 20px,1220px)}.hero{padding-top:56px}.brand small,.progress-pill{display:none}
+ .grid2,.grid3,.grid4,.mastery,.compare{grid-template-columns:1fr}.section{padding:45px 0}
+ h1{font-size:clamp(3rem,19vw,5.2rem)}.topbar .inner{min-height:60px}.lab{padding:9px}
+}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media print{.topbar,.cta,.interactive{display:none!important}body{background:#fff;color:#111}.panel{box-shadow:none}.section{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header class="topbar">
+ <div class="shell inner">
+  <div class="brand"><div class="logo">K</div><div>KNN // DECISION LAB<small>PREMIÈRE NSI · COMPRENDRE → TESTER → CODER</small></div></div>
+  <div class="top-actions"><span class="progress-pill" id="globalProgress">0 / 6 étapes</span><button class="btn small" id="themeBtn" aria-label="Changer de thème">◐</button><button class="btn small" id="resetAll" aria-label="Réinitialiser la progression">↺</button></div>
+ </div>
+</header>
+
+<main>
+<section class="hero">
+ <div class="shell hero-grid">
+  <div>
+   <span class="eyebrow"><i class="dot"></i> apprentissage supervisé · KNN sans boîte noire</span>
+   <h1>APPRENDRE<br><em>PAR PROXIMITÉ.</em></h1>
+   <p class="lead">KNN classe une nouvelle donnée en observant les exemples qui lui ressemblent le plus. Ici, tu vas <strong>voir la décision</strong>, la calculer, provoquer ses erreurs, comprendre l’effet de <strong>k</strong> et de l’échelle des variables, puis reconstruire l’algorithme en Python.</p>
+   <div class="cta"><a class="btn primary" href="#parcours" style="text-decoration:none">Commencer le parcours ↓</a><a class="btn" href="#lab" style="text-decoration:none">Ouvrir le laboratoire</a></div>
+  </div>
+  <aside class="panel hero-console">
+   <div class="console-inner">
+    <div class="kicker">Mission d’apprentissage</div>
+    <h3 style="font-size:1.55rem;margin:8px 0">Savoir expliquer une prédiction, pas seulement obtenir une réponse.</h3>
+    <div class="path">
+     <div class="path-row"><span class="path-n">01</span><div><b>Modéliser</b><span>caractéristiques + classe</span></div><span>≈ 8 min</span></div>
+     <div class="path-row"><span class="path-n">02</span><div><b>Calculer</b><span>distance + classement</span></div><span>≈ 10 min</span></div>
+     <div class="path-row"><span class="path-n">03</span><div><b>Expérimenter</b><span>k + frontières + vote</span></div><span>≈ 15 min</span></div>
+     <div class="path-row"><span class="path-n">04</span><div><b>Évaluer</b><span>validation + test</span></div><span>≈ 12 min</span></div>
+    </div>
+   </div>
+  </aside>
+ </div>
+</section>
+
+<section class="section" id="parcours">
+ <div class="shell">
+  <div class="section-head"><div><div class="kicker">00 · Carte de progression</div><h2>Un parcours, six compétences.</h2></div><p>La page mémorise localement ta progression. Chaque étape correspond à une action observable : expliquer, calculer, expérimenter, diagnostiquer, évaluer, coder.</p></div>
+  <div class="mastery" id="masteryGrid">
+   <div class="mastery-item" data-m="model"><div class="icon">01</div><strong>Modèle</strong><span>Je distingue caractéristiques, classe et donnée à prédire.</span></div>
+   <div class="mastery-item" data-m="distance"><div class="icon">02</div><strong>Distance</strong><span>Je sais expliquer et calculer une distance euclidienne.</span></div>
+   <div class="mastery-item" data-m="lab"><div class="icon">03</div><strong>K & vote</strong><span>Je sais prévoir l’effet d’un changement de k.</span></div>
+   <div class="mastery-item" data-m="scale"><div class="icon">04</div><strong>Échelle</strong><span>Je sais expliquer pourquoi normaliser peut changer le voisinage.</span></div>
+   <div class="mastery-item" data-m="eval"><div class="icon">05</div><strong>Évaluation</strong><span>Je distingue apprentissage, validation et test.</span></div>
+   <div class="mastery-item" data-m="code"><div class="icon">06</div><strong>Python</strong><span>Je retrouve les étapes de KNN dans un programme.</span></div>
+  </div>
+ </div>
+</section>
+
+<section class="section" id="notion">
+ <div class="shell">
+  <div class="section-head"><div><div class="kicker">01 · Modèle mental</div><h2>Avant KNN : que “voit” la machine ?</h2></div><p>Une machine ne voit pas « un drone » ou « une fleur » : elle reçoit une représentation numérique et des exemples déjà étiquetés.</p></div>
+  <div class="grid3">
+   <article class="panel card"><span class="badge">ENTRÉE</span><h3>Caractéristiques</h3><p>Des nombres décrivent chaque objet. Ex. une fleur peut être décrite par longueur et largeur de sépale.</p></article>
+   <article class="panel card"><span class="badge">EXEMPLES</span><h3>Classes connues</h3><p>Chaque exemple possède déjà une étiquette. KNN est donc ici un algorithme de <strong>classification supervisée</strong>.</p></article>
+   <article class="panel card"><span class="badge">SORTIE</span><h3>Classe prédite</h3><p>Pour une nouvelle donnée, KNN cherche les voisins les plus proches puis agrège leurs classes.</p></article>
+  </div>
+  <div class="flow">
+   <div class="f"><span>1</span><b>Représenter</b><span>choisir les variables utiles</span></div>
+   <div class="f"><span>2</span><b>Mesurer</b><span>distance à chaque exemple</span></div>
+   <div class="f"><span>3</span><b>Trier</b><span>du plus proche au plus loin</span></div>
+   <div class="f"><span>4</span><b>Garder k</b><span>le voisinage choisi</span></div>
+   <div class="f"><span>5</span><b>Voter</b><span>classe majoritaire</span></div>
+  </div>
+  <div class="grid2" style="margin-top:16px">
+   <div class="panel card"><div class="kicker">Lien Première NSI</div><p>La notion « machine learning » n’est pas une exigence explicite du programme. En revanche, cette activité mobilise directement tableaux, dictionnaires, fonctions, parcours, tri, traitement de données et tests de programmes.</p></div>
+   <div class="panel card"><div class="kicker">Nuance importante</div><p>KNN est souvent appelé « modèle », mais son “apprentissage” est particulier : il mémorise essentiellement les exemples de référence. Le calcul coûteux a lieu surtout au moment de prédire.</p></div>
+  </div>
+  <button class="btn interactive" id="markModel" style="margin-top:14px">✓ J’ai compris les objets manipulés</button>
+ </div>
+</section>
+
+<section class="section" id="worked">
+ <div class="shell">
+  <div class="section-head"><div><div class="kicker">02 · Exemple guidé</div><h2>Une prédiction, ligne par ligne.</h2></div><p>On commence avec un exemple travaillé avant de te laisser seul. La distance euclidienne est simplement Pythagore appliqué aux coordonnées.</p></div>
+  <div class="panel worked">
+   <div class="worked-layout">
+    <div class="mini-plane">
+     <svg viewBox="0 0 520 360" role="img" aria-label="Exemple KNN avec cinq points et une cible">
+      <g stroke="var(--line)" stroke-width="1" opacity=".7">
+       <path d="M55 40V310H485"/><path d="M55 85H485M55 130H485M55 175H485M55 220H485M55 265H485"/>
+       <path d="M125 40V310M195 40V310M265 40V310M335 40V310M405 40V310"/>
+      </g>
+      <circle cx="160" cy="115" r="10" fill="var(--cyan)"/><circle cx="205" cy="150" r="10" fill="var(--cyan)"/><circle cx="240" cy="90" r="10" fill="var(--cyan)"/>
+      <rect x="338" y="205" width="18" height="18" rx="2" fill="var(--amber)" transform="rotate(45 347 214)"/><rect x="382" y="170" width="18" height="18" rx="2" fill="var(--amber)" transform="rotate(45 391 179)"/>
+      <polygon points="290,148 300,158 290,168 280,158" fill="var(--violet)" stroke="var(--text)" stroke-width="2"/>
+      <line x1="290" y1="158" x2="240" y2="90" stroke="var(--violet)" stroke-width="2" stroke-dasharray="6 5"/>
+      <text x="303" y="150" fill="var(--text)" font-size="13" font-weight="700">cible</text>
+     </svg>
+    </div>
+    <div>
+     <div class="work-step active" data-ws="1"><div class="kicker">Étape 1</div><b>Choisir une mesure de proximité</b><p>Pour deux points A(x₁,y₁) et B(x₂,y₂), on utilise : <code>d = √((x₂−x₁)² + (y₂−y₁)²)</code>.</p></div>
+     <div class="work-step" data-ws="2"><div class="kicker">Étape 2</div><b>Calculer toutes les distances</b><p>Pour la cible, on calcule une distance vers chacun des 5 exemples : aucune classe n’est encore choisie.</p></div>
+     <div class="work-step" data-ws="3"><div class="kicker">Étape 3</div><b>Trier et ne garder que k</b><p>Avec k = 3, seules les trois plus petites distances comptent dans le vote.</p></div>
+     <div class="work-step" data-ws="4"><div class="kicker">Étape 4</div><b>Voter</b><p>Si les 3 voisins sont CYAN, CYAN, AMBRE, la prédiction est CYAN par 2 voix contre 1.</p></div>
+     <div class="cta interactive"><button class="btn" id="prevWorked">← précédent</button><button class="btn primary" id="nextWorked">étape suivante →</button></div>
+     <div class="feedback" id="workedFeedback">Commence par identifier ce que signifie « proche » dans l’espace des caractéristiques.</div>
+    </div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section class="section" id="lab">
+ <div class="shell">
+  <div class="section-head"><div><div class="kicker">03 · Decision Lab</div><h2>Provoque l’algorithme.</h2></div><p>Change de données, déplace la cible, modifie k, la distance, la normalisation ou le type de vote. Le but est de formuler une hypothèse avant de révéler la réponse.</p></div>
+  <div class="panel lab">
+   <div class="lab-layout">
+    <div>
+     <div class="viz">
+      <div class="dataset-tabs">
+       <button class="dataset-btn active" data-ds="drones">Drones · simulé</button>
+       <button class="dataset-btn" data-ds="iris">Iris · données réelles</button>
+       <button class="dataset-btn" data-ds="arena">Arena · simulé</button>
+      </div>
+      <div class="dataset-meta" id="datasetMeta"></div>
+      <div class="legend" id="legend"></div>
+      <svg id="plot" viewBox="0 0 800 520" role="img" tabindex="0" aria-labelledby="plotTitle plotDesc">
+       <title id="plotTitle">Laboratoire KNN interactif</title>
+       <desc id="plotDesc">Déplace la cible au clic, au toucher ou avec les flèches du clavier. Les points représentent les exemples de référence.</desc>
+       <g id="regions"></g><g id="grid"></g><g id="radius"></g><g id="links"></g><g id="pts"></g><g id="target"></g>
+      </svg>
+     </div>
+     <div class="formula-box" id="formula">Le calcul du voisin le plus proche apparaîtra ici.</div>
+    </div>
+
+    <aside class="panel controls">
+     <div class="control">
+      <div class="row"><h3>Voisins k</h3><output class="big" id="kOut">3</output></div>
+      <input type="range" id="kRange" min="1" max="15" step="1" value="3" aria-label="Nombre de voisins">
+      <small id="kNote" style="color:var(--muted)"></small>
+     </div>
+     <div class="control">
+      <h3>Mesure de distance</h3>
+      <select class="select" id="metric">
+       <option value="euclidean">Euclidienne · √(Δx²+Δy²)</option>
+       <option value="manhattan">Manhattan · |Δx|+|Δy|</option>
+      </select>
+     </div>
+     <div class="control">
+      <label class="toggle"><input type="checkbox" id="scale"> <span>Normaliser les caractéristiques (z-score)</span></label>
+      <label class="toggle"><input type="checkbox" id="weighted"> <span>Pondérer le vote par 1 / distance</span></label>
+      <label class="toggle"><input type="checkbox" id="boundary"> <span>Afficher la frontière de décision</span></label>
+      <label class="toggle"><input type="checkbox" id="allLinks"> <span>Afficher toutes les distances</span></label>
+     </div>
+     <div class="control">
+      <div class="predbox">
+       <div class="kicker">Mode entraînement</div>
+       <strong id="prediction">Réponse masquée</strong>
+       <div class="challenge-options" id="classChoices"></div>
+       <button class="btn primary" id="checkPrediction" style="width:100%;margin-top:9px">Vérifier mon hypothèse</button>
+       <div class="feedback" id="predFeedback">Observe d’abord les voisins. Choisis une classe, puis vérifie.</div>
+      </div>
+     </div>
+     <div class="control">
+      <div class="row"><h3>Voisins classés</h3><span class="badge">★ = retenu</span></div>
+      <div class="table-wrap"><table><thead><tr><th>#</th><th>classe</th><th>distance</th><th>poids</th></tr></thead><tbody id="neighborRows"></tbody></table></div>
+     </div>
+     <button class="btn" id="randomTarget">↯ Nouveau cas</button>
+    </aside>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section class="section" id="scale-lab">
+ <div class="shell">
+  <div class="section-head"><div><div class="kicker">04 · Piège des échelles</div><h2>Le voisin le plus proche… selon quelle unité ?</h2></div><p>Deux variables peuvent avoir des amplitudes très différentes. Dans une distance brute, la variable numériquement la plus grande peut dominer la décision.</p></div>
+  <div class="panel trap">
+   <div class="trap-grid">
+    <div>
+     <span class="badge warn">CAS SYNTHÉTIQUE · SMARTPHONES</span>
+     <h3>Classer un téléphone de 4300 mAh et 170 g</h3>
+     <p style="color:var(--muted)">Les exemples sont classés « compact » ou « endurant ». La batterie varie par milliers, le poids par dizaines.</p>
+     <div class="compare">
+      <div class="compare-card"><div class="kicker">Distance brute · k=3</div><span class="winner" id="rawWinner">—</span><div id="rawExplain" style="color:var(--muted);font-size:.85rem"></div></div>
+      <div class="compare-card"><div class="kicker">Après z-score · k=3</div><span class="winner" id="scaledWinner">—</span><div id="scaledExplain" style="color:var(--muted);font-size:.85rem"></div></div>
+     </div>
+    </div>
+    <div>
+     <div class="callout warning"><strong>Question :</strong> si les deux classifications diffèrent, laquelle est automatiquement « vraie » ? <br><br><strong>Aucune.</strong> Normaliser corrige un problème d’échelle numérique, mais le choix des variables et de la métrique reste une décision de modélisation qu’il faut justifier.</div>
+     <div class="cta interactive"><button class="btn primary" id="runScaleTrap">Comparer les deux voisinages</button><button class="btn" id="markScale">✓ J’explique le piège</button></div>
+     <div class="feedback" id="scaleFeedback">Avant de cliquer, prédis mentalement quelle variable dominera sans normalisation.</div>
+    </div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section class="section" id="evaluation">
+ <div class="shell">
+  <div class="section-head"><div><div class="kicker">05 · Évaluation honnête</div><h2>Choisir k sans regarder la réponse.</h2></div><p>Le jeu Iris réel (ici seulement longueur et largeur de sépale, pour rester visualisable en 2D) est séparé en trois parties : apprentissage, validation pour choisir k, puis test gardé de côté pour une évaluation finale.</p></div>
+  <div class="panel eval">
+   <div class="eval-grid">
+    <div class="chartbox">
+     <div class="row"><div><span class="badge good">IRIS · RÉEL</span><h3 style="margin:8px 0">Précision sur le jeu de validation</h3></div><label class="toggle"><input type="checkbox" id="evalScale" checked> <span>normaliser</span></label></div>
+     <svg id="accChart" viewBox="0 0 760 350" role="img" aria-label="Précision de KNN sur le jeu de validation selon k"></svg>
+     <div class="callout">On <strong>choisit k avec la validation</strong>. Le jeu de test reste caché jusque-là : sinon on finit par adapter nos décisions au test lui-même.</div>
+    </div>
+    <aside>
+     <div class="metric-card"><div class="kicker">k sélectionné</div><div class="row"><b id="evalKOut">5</b><span id="valAcc">—</span></div><input id="evalK" type="range" min="1" max="15" value="5" step="1"></div>
+     <div class="metric-card"><div class="kicker">Découpage</div><p style="margin:6px 0;color:var(--muted)">90 apprentissage · 30 validation · 30 test</p></div>
+     <button class="btn primary" id="unlockTest" style="width:100%">Évaluer une fois sur le test</button>
+     <div class="metric-card" id="testCard" style="margin-top:10px"><div class="kicker">Jeu de test</div><b id="testAcc">verrouillé</b><div id="matrixWrap"></div></div>
+     <div class="feedback" id="evalFeedback">Observe la courbe de validation, sélectionne un k défendable, puis seulement ensuite ouvre le test.</div>
+    </aside>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section class="section" id="python">
+ <div class="shell">
+  <div class="section-head"><div><div class="kicker">06 · Python</div><h2>Reconstruis l’algorithme.</h2></div><p>Complète les cinq éléments manquants. Il s’agit d’un exercice de lecture et de reconstruction du code, pas d’un interpréteur Python caché.</p></div>
+  <div class="code-lab">
+   <article class="panel code-card">
+    <div class="code-head"><strong>knn_a_completer.py</strong><span class="badge">Première NSI</span></div>
+<pre><code>from math import sqrt
+
+def distance(a, b):
+    return sqrt(
+        (a["x"] - b["x"]) ** <input class="blank" id="b1" aria-label="Exposant x">
+        + (a["y"] - b["y"]) ** <input class="blank" id="b2" aria-label="Exposant y">
+    )
+
+def knn(donnees, cible, k):
+    assert 1 <= k <= len(donnees)
+    distances = []
+
+    for point in donnees:
+        d = distance(point, cible)
+        distances.append((d, point["classe"]))
+
+    distances.<input class="blank" id="b3" aria-label="Méthode de tri">
+
+    votes = {"cyan": 0, "ambre": 0}
+
+    for i in range(<input class="blank" id="b4" aria-label="Nombre d'itérations">):
+        classe = distances[i][<input class="blank" id="b5" aria-label="Indice de la classe">]
+        votes[classe] = votes[classe] + 1
+
+    if votes["cyan"] > votes["ambre"]:
+        return "cyan"
+    elif votes["ambre"] > votes["cyan"]:
+        return "ambre"
+    else:
+        return "égalité"</code></pre>
+   </article>
+   <aside class="panel card">
+    <div class="kicker">Checklist mentale</div>
+    <h3>Peux-tu relier chaque ligne au schéma ?</h3>
+    <p>1. mesurer ; 2. stocker ; 3. trier ; 4. prendre les k premiers ; 5. compter ; 6. décider.</p>
+    <button class="btn primary interactive" id="checkCode">Vérifier mes 5 réponses</button>
+    <button class="btn interactive" id="showSolution">Afficher la solution</button>
+    <div class="feedback" id="codeFeedback">Indice : un couple stocké vaut <code>(distance, classe)</code>.</div>
+    <p style="margin-top:14px"><a href="assets/knn_a_completer.py">Télécharger le squelette Python</a><br><a href="assets/iris_2d.csv">Télécharger le CSV Iris 2D</a></p>
+   </aside>
+  </div>
+ </div>
+</section>
+
+<section class="section" id="entrainement">
+ <div class="shell">
+  <div class="section-head"><div><div class="kicker">07 · Entraînement mixte</div><h2>Peux-tu transférer la méthode ?</h2></div><p>Les questions mélangent calcul, raisonnement, choix de modèle et Python. Après chaque réponse, le feedback indique quoi revoir plutôt qu’un simple « faux ».</p></div>
+  <div class="panel practice">
+   <div class="practice-layout">
+    <div>
+     <div class="row"><span class="badge" id="practiceCounter">Question 1 / 10</span><span class="badge good">score <span id="practiceScore">0</span></span></div>
+     <div class="qtitle" id="practiceQ"></div>
+     <div class="answers" id="practiceAnswers"></div>
+     <div class="feedback" id="practiceFeedback">Choisis une réponse et justifie-la avant de cliquer.</div>
+     <div class="cta interactive"><button class="btn primary" id="practiceNext" disabled>Question suivante →</button><button class="btn" id="practiceRestart">Recommencer</button></div>
+    </div>
+    <aside>
+     <div class="kicker">Carte de maîtrise</div>
+     <div id="domainBars"></div>
+    </aside>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section class="section" id="limites">
+ <div class="shell">
+  <div class="section-head"><div><div class="kicker">08 · Esprit critique</div><h2>KNN est simple. Pas simpliste.</h2></div><p>Une bonne utilisation exige de questionner les données, la distance, k et le protocole d’évaluation.</p></div>
+  <div class="grid4">
+   <article class="panel card"><span class="badge warn">k trop petit</span><h3>Très local</h3><p>La frontière peut suivre le bruit et les cas atypiques. La prédiction devient instable.</p></article>
+   <article class="panel card"><span class="badge warn">k trop grand</span><h3>Trop lissé</h3><p>Des structures locales peuvent disparaître au profit de la classe majoritaire globale.</p></article>
+   <article class="panel card"><span class="badge warn">dimensions</span><h3>Proximité fragile</h3><p>Quand le nombre de caractéristiques devient grand, les distances deviennent moins discriminantes : c’est une facette de la « malédiction de la dimension ».</p></article>
+   <article class="panel card"><span class="badge adv">vote avancé</span><h3>Pondérer</h3><p>On peut donner plus de poids aux voisins très proches. Ce n’est pas « toujours meilleur » : c’est un choix à valider sur les données.</p></article>
+  </div>
+ </div>
+</section>
+
+<section class="section" id="sources">
+ <div class="shell">
+  <div class="section-head"><div><div class="kicker">09 · Références</div><h2>Sources utilisées pour construire le cours.</h2></div></div>
+  <div class="panel sources">
+   <ul>
+    <li><a href="https://www.education.gouv.fr/bo/19/Special1/MENE1901633A.htm" target="_blank" rel="noopener">Programme officiel NSI Première</a> — données, algorithmes, programmation, tableaux, dictionnaires, tables, tri, tests.</li>
+    <li><a href="https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html" target="_blank" rel="noopener">scikit-learn — KNeighborsClassifier</a> — vote uniforme ou pondéré, métriques, paramètre k.</li>
+    <li><a href="https://scikit-learn.org/stable/auto_examples/neighbors/plot_classification.html" target="_blank" rel="noopener">scikit-learn — Nearest Neighbors Classification</a> — Iris, frontière de décision, normalisation.</li>
+    <li><a href="https://udlguidelines.cast.org/engagement/effort-persistence/feedback/" target="_blank" rel="noopener">CAST UDL 3.0</a> — feedback spécifique, accessible et orienté vers l’action.</li>
+    <li><a href="https://www.w3.org/TR/WCAG22/" target="_blank" rel="noopener">WCAG 2.2</a> — clavier, focus visible, alternatives au glisser-déposer et tailles de cibles.</li>
+   </ul>
+  </div>
+ </div>
+</section>
+</main>
+
+<footer><div class="shell frow"><div><strong>KNN // Decision Lab</strong><br>Ouverture Machine Learning · Première NSI</div><div>Autonome · sans bibliothèque JS · responsive · progression locale</div></div></footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(()=>{
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const NS="http://www.w3.org/2000/svg";
+const COLORS=["var(--cyan)","var(--amber)","var(--violet)","var(--green)"];
+const irisData=[{"x":5.1,"y":3.5,"c":0},{"x":4.9,"y":3.0,"c":0},{"x":4.7,"y":3.2,"c":0},{"x":4.6,"y":3.1,"c":0},{"x":5.0,"y":3.6,"c":0},{"x":5.4,"y":3.9,"c":0},{"x":4.6,"y":3.4,"c":0},{"x":5.0,"y":3.4,"c":0},{"x":4.4,"y":2.9,"c":0},{"x":4.9,"y":3.1,"c":0},{"x":5.4,"y":3.7,"c":0},{"x":4.8,"y":3.4,"c":0},{"x":4.8,"y":3.0,"c":0},{"x":4.3,"y":3.0,"c":0},{"x":5.8,"y":4.0,"c":0},{"x":5.7,"y":4.4,"c":0},{"x":5.4,"y":3.9,"c":0},{"x":5.1,"y":3.5,"c":0},{"x":5.7,"y":3.8,"c":0},{"x":5.1,"y":3.8,"c":0},{"x":5.4,"y":3.4,"c":0},{"x":5.1,"y":3.7,"c":0},{"x":4.6,"y":3.6,"c":0},{"x":5.1,"y":3.3,"c":0},{"x":4.8,"y":3.4,"c":0},{"x":5.0,"y":3.0,"c":0},{"x":5.0,"y":3.4,"c":0},{"x":5.2,"y":3.5,"c":0},{"x":5.2,"y":3.4,"c":0},{"x":4.7,"y":3.2,"c":0},{"x":4.8,"y":3.1,"c":0},{"x":5.4,"y":3.4,"c":0},{"x":5.2,"y":4.1,"c":0},{"x":5.5,"y":4.2,"c":0},{"x":4.9,"y":3.1,"c":0},{"x":5.0,"y":3.2,"c":0},{"x":5.5,"y":3.5,"c":0},{"x":4.9,"y":3.6,"c":0},{"x":4.4,"y":3.0,"c":0},{"x":5.1,"y":3.4,"c":0},{"x":5.0,"y":3.5,"c":0},{"x":4.5,"y":2.3,"c":0},{"x":4.4,"y":3.2,"c":0},{"x":5.0,"y":3.5,"c":0},{"x":5.1,"y":3.8,"c":0},{"x":4.8,"y":3.0,"c":0},{"x":5.1,"y":3.8,"c":0},{"x":4.6,"y":3.2,"c":0},{"x":5.3,"y":3.7,"c":0},{"x":5.0,"y":3.3,"c":0},{"x":7.0,"y":3.2,"c":1},{"x":6.4,"y":3.2,"c":1},{"x":6.9,"y":3.1,"c":1},{"x":5.5,"y":2.3,"c":1},{"x":6.5,"y":2.8,"c":1},{"x":5.7,"y":2.8,"c":1},{"x":6.3,"y":3.3,"c":1},{"x":4.9,"y":2.4,"c":1},{"x":6.6,"y":2.9,"c":1},{"x":5.2,"y":2.7,"c":1},{"x":5.0,"y":2.0,"c":1},{"x":5.9,"y":3.0,"c":1},{"x":6.0,"y":2.2,"c":1},{"x":6.1,"y":2.9,"c":1},{"x":5.6,"y":2.9,"c":1},{"x":6.7,"y":3.1,"c":1},{"x":5.6,"y":3.0,"c":1},{"x":5.8,"y":2.7,"c":1},{"x":6.2,"y":2.2,"c":1},{"x":5.6,"y":2.5,"c":1},{"x":5.9,"y":3.2,"c":1},{"x":6.1,"y":2.8,"c":1},{"x":6.3,"y":2.5,"c":1},{"x":6.1,"y":2.8,"c":1},{"x":6.4,"y":2.9,"c":1},{"x":6.6,"y":3.0,"c":1},{"x":6.8,"y":2.8,"c":1},{"x":6.7,"y":3.0,"c":1},{"x":6.0,"y":2.9,"c":1},{"x":5.7,"y":2.6,"c":1},{"x":5.5,"y":2.4,"c":1},{"x":5.5,"y":2.4,"c":1},{"x":5.8,"y":2.7,"c":1},{"x":6.0,"y":2.7,"c":1},{"x":5.4,"y":3.0,"c":1},{"x":6.0,"y":3.4,"c":1},{"x":6.7,"y":3.1,"c":1},{"x":6.3,"y":2.3,"c":1},{"x":5.6,"y":3.0,"c":1},{"x":5.5,"y":2.5,"c":1},{"x":5.5,"y":2.6,"c":1},{"x":6.1,"y":3.0,"c":1},{"x":5.8,"y":2.6,"c":1},{"x":5.0,"y":2.3,"c":1},{"x":5.6,"y":2.7,"c":1},{"x":5.7,"y":3.0,"c":1},{"x":5.7,"y":2.9,"c":1},{"x":6.2,"y":2.9,"c":1},{"x":5.1,"y":2.5,"c":1},{"x":5.7,"y":2.8,"c":1},{"x":6.3,"y":3.3,"c":2},{"x":5.8,"y":2.7,"c":2},{"x":7.1,"y":3.0,"c":2},{"x":6.3,"y":2.9,"c":2},{"x":6.5,"y":3.0,"c":2},{"x":7.6,"y":3.0,"c":2},{"x":4.9,"y":2.5,"c":2},{"x":7.3,"y":2.9,"c":2},{"x":6.7,"y":2.5,"c":2},{"x":7.2,"y":3.6,"c":2},{"x":6.5,"y":3.2,"c":2},{"x":6.4,"y":2.7,"c":2},{"x":6.8,"y":3.0,"c":2},{"x":5.7,"y":2.5,"c":2},{"x":5.8,"y":2.8,"c":2},{"x":6.4,"y":3.2,"c":2},{"x":6.5,"y":3.0,"c":2},{"x":7.7,"y":3.8,"c":2},{"x":7.7,"y":2.6,"c":2},{"x":6.0,"y":2.2,"c":2},{"x":6.9,"y":3.2,"c":2},{"x":5.6,"y":2.8,"c":2},{"x":7.7,"y":2.8,"c":2},{"x":6.3,"y":2.7,"c":2},{"x":6.7,"y":3.3,"c":2},{"x":7.2,"y":3.2,"c":2},{"x":6.2,"y":2.8,"c":2},{"x":6.1,"y":3.0,"c":2},{"x":6.4,"y":2.8,"c":2},{"x":7.2,"y":3.0,"c":2},{"x":7.4,"y":2.8,"c":2},{"x":7.9,"y":3.8,"c":2},{"x":6.4,"y":2.8,"c":2},{"x":6.3,"y":2.8,"c":2},{"x":6.1,"y":2.6,"c":2},{"x":7.7,"y":3.0,"c":2},{"x":6.3,"y":3.4,"c":2},{"x":6.4,"y":3.1,"c":2},{"x":6.0,"y":3.0,"c":2},{"x":6.9,"y":3.1,"c":2},{"x":6.7,"y":3.1,"c":2},{"x":6.9,"y":3.1,"c":2},{"x":5.8,"y":2.7,"c":2},{"x":6.8,"y":3.2,"c":2},{"x":6.7,"y":3.3,"c":2},{"x":6.7,"y":3.0,"c":2},{"x":6.3,"y":2.5,"c":2},{"x":6.5,"y":3.0,"c":2},{"x":6.2,"y":3.4,"c":2},{"x":5.9,"y":3.0,"c":2}];
+const datasets={
+ drones:{
+  title:"Drones de mission",kind:"simulé",xName:"vitesse",yName:"autonomie",xUnit:"",yUnit:"",
+  classes:["éclaireur","porteur"],xMin:0,xMax:100,yMin:0,yMax:100,
+  points:[
+   {x:16,y:72,c:0},{x:25,y:81,c:0},{x:31,y:65,c:0},{x:38,y:77,c:0},{x:44,y:61,c:0},{x:52,y:72,c:0},
+   {x:63,y:30,c:1},{x:72,y:42,c:1},{x:78,y:24,c:1},{x:66,y:54,c:1},{x:86,y:49,c:1},{x:56,y:39,c:1}
+  ],target:{x:55,y:52}
+ },
+ iris:{
+  title:"Iris — sépales",kind:"réel · Fisher / scikit-learn",xName:"longueur sépale",yName:"largeur sépale",xUnit:"cm",yUnit:"cm",
+  classes:["setosa","versicolor","virginica"],xMin:4.1,xMax:8.1,yMin:1.8,yMax:4.6,
+  points:irisData,target:{x:6.2,y:3.0}
+ },
+ arena:{
+  title:"Arena — rôles de jeu",kind:"simulé",xName:"mobilité",yName:"résistance",xUnit:"",yUnit:"",
+  classes:["scout","tank","support"],xMin:0,xMax:100,yMin:0,yMax:100,
+  points:[
+   {x:82,y:28,c:0},{x:74,y:34,c:0},{x:88,y:38,c:0},{x:69,y:25,c:0},{x:79,y:45,c:0},
+   {x:22,y:84,c:1},{x:31,y:78,c:1},{x:37,y:88,c:1},{x:28,y:68,c:1},{x:42,y:80,c:1},
+   {x:50,y:48,c:2},{x:57,y:55,c:2},{x:44,y:59,c:2},{x:61,y:64,c:2},{x:49,y:70,c:2}
+  ],target:{x:58,y:47}
+ }
+};
+
+const mastery={model:false,distance:false,lab:false,scale:false,eval:false,code:false};
+try{Object.assign(mastery,JSON.parse(localStorage.getItem("knnMastery")||"{}"))}catch(e){}
+function saveMastery(){try{localStorage.setItem("knnMastery",JSON.stringify(mastery))}catch(e){} renderMastery()}
+function mark(k){mastery[k]=true;saveMastery()}
+function renderMastery(){
+ let n=0;
+ $$(".mastery-item").forEach(el=>{const d=!!mastery[el.dataset.m];el.classList.toggle("done",d);if(d)n++});
+ $("#globalProgress").textContent=`${n} / 6 étapes`;
+}
+renderMastery();
+$("#markModel").addEventListener("click",()=>{mark("model");toast("Compétence « modèle » validée")});
+
+/* Worked example */
+let ws=1;
+function renderWorked(){
+ $$(".work-step").forEach(x=>x.classList.toggle("active",Number(x.dataset.ws)===ws));
+ const msgs=[
+  "Commence par identifier ce que signifie « proche » dans l’espace des caractéristiques.",
+  "Chaque exemple doit être comparé : avec n exemples, on calcule n distances dans l’implémentation naïve.",
+  "Le tri transforme une collection de distances en classement exploitable.",
+  "Le vote convertit le voisinage en prédiction. Tu peux maintenant passer au laboratoire."
+ ];
+ $("#workedFeedback").textContent=msgs[ws-1];
+ if(ws===4)mark("distance");
+}
+$("#prevWorked").addEventListener("click",()=>{ws=Math.max(1,ws-1);renderWorked()});
+$("#nextWorked").addEventListener("click",()=>{ws=Math.min(4,ws+1);renderWorked()});
+
+/* Main KNN lab */
+const plot=$("#plot"), W=800,H=520,M={l:72,r:28,t:28,b:62},pw=W-M.l-M.r,ph=H-M.t-M.b;
+let dsKey="drones",k=3,metric="euclidean",scale=false,weighted=false,boundary=false,allLinks=false,guess=null,revealed=false;
+let target={...datasets[dsKey].target};
+function S(name,attrs={}){const e=document.createElementNS(NS,name);for(const [a,v] of Object.entries(attrs))e.setAttribute(a,v);return e}
+function stats(points){
+ const mx=points.reduce((s,p)=>s+p.x,0)/points.length,my=points.reduce((s,p)=>s+p.y,0)/points.length;
+ const sx=Math.sqrt(points.reduce((s,p)=>s+(p.x-mx)**2,0)/points.length)||1;
+ const sy=Math.sqrt(points.reduce((s,p)=>s+(p.y-my)**2,0)/points.length)||1;
+ return {mx,my,sx,sy};
+}
+function xy(p,st,useScale){
+ if(!useScale)return [p.x,p.y];
+ return [(p.x-st.mx)/st.sx,(p.y-st.my)/st.sy];
+}
+function distance(a,b,points=datasets[dsKey].points,useScale=scale,met=metric){
+ const st=stats(points),A=xy(a,st,useScale),B=xy(b,st,useScale),dx=Math.abs(A[0]-B[0]),dy=Math.abs(A[1]-B[1]);
+ return met==="manhattan"?dx+dy:Math.hypot(dx,dy);
+}
+function rank(q=target,points=datasets[dsKey].points,useScale=scale,met=metric){
+ return points.map((p,i)=>({...p,i,d:distance(p,q,points,useScale,met)})).sort((a,b)=>a.d-b.d);
+}
+function predict(q=target,kk=k,points=datasets[dsKey].points,useScale=scale,met=metric,useWeighted=weighted){
+ const r=rank(q,points,useScale,met),n=r.slice(0,Math.min(kk,r.length)),scores={};
+ n.forEach(p=>{const w=useWeighted?1/Math.max(p.d,1e-9):1;scores[p.c]=(scores[p.c]||0)+w});
+ let best=-Infinity,winners=[];
+ Object.entries(scores).forEach(([c,s])=>{if(s>best+1e-12){best=s;winners=[Number(c)]}else if(Math.abs(s-best)<=1e-12)winners.push(Number(c))});
+ if(winners.length>1){
+   const first=n.find(p=>winners.includes(p.c)); return {label:first.c,ranked:r,neighbors:n,scores,tie:true};
+ }
+ return {label:winners[0],ranked:r,neighbors:n,scores,tie:false};
+}
+function X(v){const d=datasets[dsKey];return M.l+(v-d.xMin)/(d.xMax-d.xMin)*pw}
+function Y(v){const d=datasets[dsKey];return M.t+(1-(v-d.yMin)/(d.yMax-d.yMin))*ph}
+function invX(px){const d=datasets[dsKey];return d.xMin+(px-M.l)/pw*(d.xMax-d.xMin)}
+function invY(py){const d=datasets[dsKey];return d.yMin+(1-(py-M.t)/ph)*(d.yMax-d.yMin)}
+function drawGrid(){
+ const g=$("#grid");g.innerHTML="";const d=datasets[dsKey];
+ for(let i=0;i<=5;i++){
+  const xv=d.xMin+(d.xMax-d.xMin)*i/5,yv=d.yMin+(d.yMax-d.yMin)*i/5,px=X(xv),py=Y(yv);
+  g.append(S("line",{x1:px,y1:M.t,x2:px,y2:H-M.b,stroke:"var(--line)",opacity:.55}));
+  g.append(S("line",{x1:M.l,y1:py,x2:W-M.r,y2:py,stroke:"var(--line)",opacity:.55}));
+  const tx=S("text",{x:px,y:H-M.b+22,"text-anchor":"middle",class:"tick"});tx.textContent=(Math.abs(xv)<10?xv.toFixed(1):xv.toFixed(0));g.append(tx);
+  const ty=S("text",{x:M.l-12,y:py+4,"text-anchor":"end",class:"tick"});ty.textContent=(Math.abs(yv)<10?yv.toFixed(1):yv.toFixed(0));g.append(ty);
+ }
+ const xl=S("text",{x:M.l+pw/2,y:H-12,"text-anchor":"middle",class:"axis"});xl.textContent=`${d.xName}${d.xUnit?" ("+d.xUnit+")":""} →`;g.append(xl);
+ const yl=S("text",{x:18,y:M.t+ph/2,transform:`rotate(-90 18 ${M.t+ph/2})`,"text-anchor":"middle",class:"axis"});yl.textContent=`${d.yName}${d.yUnit?" ("+d.yUnit+")":""} →`;g.append(yl);
+}
+function drawBoundary(){
+ const g=$("#regions");g.innerHTML="";if(!boundary)return;
+ const d=datasets[dsKey],cols=34,rows=21,cw=pw/cols,ch=ph/rows;
+ for(let j=0;j<rows;j++)for(let i=0;i<cols;i++){
+  const q={x:d.xMin+(i+.5)/cols*(d.xMax-d.xMin),y:d.yMax-(j+.5)/rows*(d.yMax-d.yMin)};
+  const c=predict(q,k,d.points,scale,metric,weighted).label;
+  g.append(S("rect",{x:M.l+i*cw,y:M.t+j*ch,width:cw+.6,height:ch+.6,fill:COLORS[c],opacity:.08}));
+ }
+}
+function pointShape(g,p,r=7){
+ const cx=X(p.x),cy=Y(p.y);
+ if(p.c%3===0)g.append(S("circle",{cx,cy,r,fill:COLORS[p.c],stroke:"var(--bg2)","stroke-width":2}));
+ else if(p.c%3===1)g.append(S("rect",{x:cx-r,y:cy-r,width:2*r,height:2*r,rx:2,fill:COLORS[p.c],stroke:"var(--bg2)","stroke-width":2,transform:`rotate(45 ${cx} ${cy})`}));
+ else g.append(S("polygon",{points:`${cx},${cy-r-1} ${cx+r+1},${cy+r} ${cx-r-1},${cy+r}`,fill:COLORS[p.c],stroke:"var(--bg2)","stroke-width":2}));
+}
+function renderLab(){
+ const d=datasets[dsKey],res=predict();
+ $("#datasetMeta").innerHTML=`<span class="badge">${d.kind}</span><span>${d.points.length} exemples · ${d.classes.length} classes · cible déplaçable</span>`;
+ $("#legend").innerHTML=d.classes.map((c,i)=>`<span><i class="sw" style="background:${COLORS[i]}"></i>${c}</span>`).join("")+`<span><i class="sw" style="background:var(--blue)"></i>cible</span>`;
+ $("#kOut").textContent=k;
+ $("#kRange").max=Math.min(15,d.points.length);
+ $("#kNote").textContent=weighted
+  ?"Avec un vote pondéré, pair/impair ne garantit pas l’absence d’égalité de score."
+  :(d.classes.length===2&&k%2===1
+    ?"Avec 2 classes et un vote uniforme, k impair évite une égalité de nombre de voix."
+    :"Ici, une égalité éventuelle est départagée par le plus proche voisin parmi les classes ex æquo.");
+ drawGrid();drawBoundary();
+
+ const pg=$("#pts");pg.innerHTML="";d.points.forEach(p=>pointShape(pg,p,dsKey==="iris"?4.6:7));
+ const lg=$("#links");lg.innerHTML="";const chosen=new Set(res.neighbors.map(p=>p.i));
+ res.ranked.forEach(p=>{if(!allLinks&&!chosen.has(p.i))return;lg.append(S("line",{x1:X(target.x),y1:Y(target.y),x2:X(p.x),y2:Y(p.y),stroke:chosen.has(p.i)?"var(--violet)":"var(--muted)","stroke-width":chosen.has(p.i)?1.8:1,"stroke-dasharray":chosen.has(p.i)?"0":"5 7",opacity:chosen.has(p.i)?.75:.22}))});
+ const rg=$("#radius");rg.innerHTML="";const kth=res.neighbors[res.neighbors.length-1];
+ if(kth){
+   const st=stats(d.points),ux=scale?st.sx:1,uy=scale?st.sy:1;
+   const rx=kth.d*ux*pw/(d.xMax-d.xMin), ry=kth.d*uy*ph/(d.yMax-d.yMin);
+   if(metric==="euclidean"){
+     rg.append(S("ellipse",{cx:X(target.x),cy:Y(target.y),rx,ry,fill:"none",stroke:"var(--violet)","stroke-width":1.4,"stroke-dasharray":"7 7",opacity:.42}));
+   }else{
+     const ptsRing=[
+       [X(target.x+kth.d*ux),Y(target.y)],
+       [X(target.x),Y(target.y+kth.d*uy)],
+       [X(target.x-kth.d*ux),Y(target.y)],
+       [X(target.x),Y(target.y-kth.d*uy)]
+     ].map(q=>q.join(",")).join(" ");
+     rg.append(S("polygon",{points:ptsRing,fill:"none",stroke:"var(--violet)","stroke-width":1.4,"stroke-dasharray":"7 7",opacity:.42}));
+   }
+ }
+ const tg=$("#target");tg.innerHTML="";const cx=X(target.x),cy=Y(target.y),r=12;tg.append(S("polygon",{points:`${cx},${cy-r} ${cx+r},${cy} ${cx},${cy+r} ${cx-r},${cy}`,fill:"var(--blue)",stroke:"var(--text)","stroke-width":2}));
+ const n1=res.ranked[0],st=stats(d.points),A=xy(target,st,scale),B=xy(n1,st,scale),dx=Math.abs(A[0]-B[0]),dy=Math.abs(A[1]-B[1]);
+ $("#formula").innerHTML=metric==="euclidean"
+  ?`Voisin #1 : <strong>${d.classes[n1.c]}</strong> · d = √((${fmt(dx)})² + (${fmt(dy)})²) = <strong>${fmt(n1.d)}</strong>${scale?" après normalisation":""}`
+  :`Voisin #1 : <strong>${d.classes[n1.c]}</strong> · d = |${fmt(dx)}| + |${fmt(dy)}| = <strong>${fmt(n1.d)}</strong>${scale?" après normalisation":""}`;
+ $("#neighborRows").innerHTML=res.ranked.slice(0,Math.max(8,k)).map((p,i)=>{
+   const wt=weighted?1/Math.max(p.d,1e-9):1;
+   return `<tr style="${i<k?"font-weight:850":""}"><td>${i+1}${i<k?" ★":""}</td><td>${d.classes[p.c]}</td><td>${fmt(p.d)}</td><td>${fmt(wt)}</td></tr>`
+ }).join("");
+ $("#classChoices").innerHTML=d.classes.map((c,i)=>`<button class="answer ${guess===i?"selected":""}" data-c="${i}">${c}</button>`).join("");
+ $$("#classChoices .answer").forEach(b=>b.addEventListener("click",()=>{guess=Number(b.dataset.c);renderLab()}));
+ $("#prediction").textContent=revealed?d.classes[res.label]:"Réponse masquée";
+ $("#prediction").style.color=revealed?COLORS[res.label]:"var(--text)";
+ if(!revealed)$("#predFeedback").textContent="Observe d’abord les voisins. Choisis une classe, puis vérifie.";
+}
+function fmt(v){return Math.abs(v)>=100?Number(v).toFixed(0):Number(v).toFixed(2)}
+function setTarget(x,y){const d=datasets[dsKey];target.x=Math.max(d.xMin,Math.min(d.xMax,x));target.y=Math.max(d.yMin,Math.min(d.yMax,y));guess=null;revealed=false;renderLab()}
+plot.addEventListener("pointerdown",e=>{const pt=plot.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const q=pt.matrixTransform(plot.getScreenCTM().inverse());if(q.x>=M.l&&q.x<=W-M.r&&q.y>=M.t&&q.y<=H-M.b)setTarget(invX(q.x),invY(q.y))});
+plot.addEventListener("keydown",e=>{if(!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(e.key))return;e.preventDefault();const d=datasets[dsKey],sx=(d.xMax-d.xMin)/50,sy=(d.yMax-d.yMin)/50,m=e.shiftKey?5:1;if(e.key==="ArrowLeft")setTarget(target.x-sx*m,target.y);if(e.key==="ArrowRight")setTarget(target.x+sx*m,target.y);if(e.key==="ArrowUp")setTarget(target.x,target.y+sy*m);if(e.key==="ArrowDown")setTarget(target.x,target.y-sy*m)});
+$$(".dataset-btn").forEach(b=>b.addEventListener("click",()=>{dsKey=b.dataset.ds;$$(".dataset-btn").forEach(x=>x.classList.toggle("active",x===b));target={...datasets[dsKey].target};k=Math.min(3,datasets[dsKey].points.length);$("#kRange").value=k;guess=null;revealed=false;renderLab()}));
+$("#kRange").addEventListener("input",e=>{k=Number(e.target.value);guess=null;revealed=false;renderLab()});
+$("#metric").addEventListener("change",e=>{metric=e.target.value;revealed=false;renderLab()});
+$("#scale").addEventListener("change",e=>{scale=e.target.checked;revealed=false;renderLab()});
+$("#weighted").addEventListener("change",e=>{weighted=e.target.checked;revealed=false;renderLab()});
+$("#boundary").addEventListener("change",e=>{boundary=e.target.checked;renderLab()});
+$("#allLinks").addEventListener("change",e=>{allLinks=e.target.checked;renderLab()});
+$("#randomTarget").addEventListener("click",()=>{const d=datasets[dsKey];setTarget(d.xMin+(d.xMax-d.xMin)*(.12+.76*Math.random()),d.yMin+(d.yMax-d.yMin)*(.12+.76*Math.random()))});
+$("#checkPrediction").addEventListener("click",()=>{
+ if(guess===null){$("#predFeedback").textContent="Choisis d’abord une classe : une hypothèse précède la vérification.";return}
+ const r=predict();revealed=true;renderLab();
+ const tieMsg=r.tie?" Une égalité de score a été départagée par le voisin le plus proche parmi les classes ex æquo.":"";
+ if(guess===r.label){$("#predFeedback").innerHTML=`✓ Hypothèse confirmée. Reprends le classement et explique <strong>pourquoi</strong> ${datasets[dsKey].classes[r.label]} gagne.${tieMsg}`;mark("lab")}
+ else $("#predFeedback").innerHTML=`Hypothèse réfutée. Repars des ${k} premières lignes : la prédiction est <strong>${datasets[dsKey].classes[r.label]}</strong>.${tieMsg}`;
+});
+
+/* Scale trap */
+const phone=[
+ {x:3000,y:170,c:0},{x:3200,y:175,c:0},{x:3400,y:165,c:0},
+ {x:4800,y:210,c:1},{x:5000,y:205,c:1},{x:5200,y:215,c:1}
+], phoneQ={x:4300,y:170}, phoneClasses=["compact","endurant"];
+function localPredict(points,q,useScale){
+ const st=stats(points),rr=points.map((p,i)=>{
+   const A=useScale?[(p.x-st.mx)/st.sx,(p.y-st.my)/st.sy]:[p.x,p.y],B=useScale?[(q.x-st.mx)/st.sx,(q.y-st.my)/st.sy]:[q.x,q.y];
+   return {...p,d:Math.hypot(A[0]-B[0],A[1]-B[1])}
+ }).sort((a,b)=>a.d-b.d).slice(0,3);
+ const v=[0,0];rr.forEach(p=>v[p.c]++);return {label:v[0]>v[1]?0:1,n:rr,v};
+}
+$("#runScaleTrap").addEventListener("click",()=>{
+ const a=localPredict(phone,phoneQ,false),b=localPredict(phone,phoneQ,true);
+ $("#rawWinner").textContent=phoneClasses[a.label];$("#scaledWinner").textContent=phoneClasses[b.label];
+ $("#rawExplain").textContent=`voisins : ${a.n.map(p=>phoneClasses[p.c]).join(" · ")}`;
+ $("#scaledExplain").textContent=`voisins : ${b.n.map(p=>phoneClasses[p.c]).join(" · ")}`;
+ $("#scaleFeedback").innerHTML="Sans normalisation, les écarts de batterie dominent. Après z-score, batterie et poids sont exprimés sur des échelles comparables. <strong>La prédiction change ici volontairement.</strong>";
+});
+$("#markScale").addEventListener("click",()=>{mark("scale");toast("Compétence « échelle » validée")});
+
+/* Honest evaluation on Iris: stratified 60/20/20 */
+const split={train:[],val:[],test:[]};
+irisData.forEach((p,i)=>{const within=i%50;if(within%5===0)split.test.push(p);else if(within%5===1)split.val.push(p);else split.train.push(p)});
+function evalStats(train){return stats(train)}
+function classifyFromTrain(q,train,kk,useScale){
+ const st=evalStats(train),arr=train.map(p=>{
+  const A=useScale?[(p.x-st.mx)/st.sx,(p.y-st.my)/st.sy]:[p.x,p.y],B=useScale?[(q.x-st.mx)/st.sx,(q.y-st.my)/st.sy]:[q.x,q.y];
+  return {...p,d:Math.hypot(A[0]-B[0],A[1]-B[1])}
+ }).sort((a,b)=>a.d-b.d).slice(0,kk);
+ const v=[0,0,0];arr.forEach(p=>v[p.c]++);
+ const max=Math.max(...v),ties=[0,1,2].filter(c=>v[c]===max);
+ if(ties.length===1)return ties[0];
+ return arr.find(p=>ties.includes(p.c)).c;
+}
+function accuracy(set,kk,useScale){
+ let ok=0;set.forEach(q=>{if(classifyFromTrain(q,split.train,kk,useScale)===q.c)ok++});return ok/set.length;
+}
+function renderAccChart(){
+ const svg=$("#accChart");svg.innerHTML="";const useScale=$("#evalScale").checked;
+ const L=55,R=18,T=24,B=45,w=760-L-R,h=350-T-B,vals=[];
+ for(let kk=1;kk<=15;kk++)vals.push({k:kk,a:accuracy(split.val,kk,useScale)});
+ [0,.25,.5,.75,1].forEach(v=>{const y=T+(1-v)*h;svg.append(S("line",{x1:L,y1:y,x2:760-R,y2:y,stroke:"var(--line)",opacity:.55}));let tx=S("text",{x:L-10,y:y+4,"text-anchor":"end",class:"tick"});tx.textContent=Math.round(v*100)+"%";svg.append(tx)});
+ let pts="";
+ vals.forEach((o,i)=>{const x=L+i/(vals.length-1)*w,y=T+(1-o.a)*h;pts+=`${x},${y} `;svg.append(S("circle",{cx:x,cy:y,r:o.k===Number($("#evalK").value)?7:4,fill:o.k===Number($("#evalK").value)?"var(--violet)":"var(--cyan)"}));let tx=S("text",{x,y:350-16,"text-anchor":"middle",class:"tick"});tx.textContent=o.k;svg.append(tx)});
+ svg.insertBefore(S("polyline",{points:pts.trim(),fill:"none",stroke:"var(--cyan)","stroke-width":2.5}),svg.firstChild);
+ const kk=Number($("#evalK").value),a=vals[kk-1].a;$("#evalKOut").textContent=kk;$("#valAcc").textContent=`validation : ${(a*100).toFixed(1)} %`;
+}
+let testUnlocked=false;
+$("#evalK").addEventListener("input",()=>{testUnlocked=false;$("#unlockTest").disabled=false;$("#testAcc").textContent="verrouillé";$("#matrixWrap").innerHTML="";$("#evalFeedback").textContent="k a changé : le test est de nouveau verrouillé. Base ton choix sur la validation.";renderAccChart()});
+$("#evalScale").addEventListener("change",()=>{testUnlocked=false;$("#unlockTest").disabled=false;$("#testAcc").textContent="verrouillé";$("#matrixWrap").innerHTML="";renderAccChart()});
+$("#unlockTest").addEventListener("click",()=>{
+ const kk=Number($("#evalK").value),sc=$("#evalScale").checked,a=accuracy(split.test,kk,sc);testUnlocked=true;$("#unlockTest").disabled=true;$("#testAcc").textContent=(a*100).toFixed(1)+" %";
+ const mat=[[0,0,0],[0,0,0],[0,0,0]];split.test.forEach(q=>mat[q.c][classifyFromTrain(q,split.train,kk,sc)]++);
+ $("#matrixWrap").innerHTML='<div class="matrix"><div class="head">réel ↓ / prédit →</div>'+["setosa","vers.","virg."].map(x=>`<div class="head">${x}</div>`).join("")+
+  mat.map((row,i)=>`<div class="head">${["setosa","vers.","virg."][i]}</div>${row.map(v=>`<div>${v}</div>`).join("")}`).join("")+"</div>";
+ $("#evalFeedback").innerHTML=`Tu as choisi k=${kk} à partir de la validation, puis obtenu <strong>${(a*100).toFixed(1)} %</strong> sur 30 exemples restés à l’écart. C’est une estimation plus honnête que de choisir k directement sur le test.`;
+ mark("eval");
+});
+
+/* Code completion */
+let codeAttempts=0;
+$("#checkCode").addEventListener("click",()=>{
+ codeAttempts++;
+ const vals=[$("#b1").value.trim(),$("#b2").value.trim(),$("#b3").value.trim().replace(/\(\)$/,""),$("#b4").value.trim(),$("#b5").value.trim()];
+ const exp=["2","2","sort","k","1"],ok=vals.map((v,i)=>v===exp[i]);
+ [1,2,3,4,5].forEach((n,i)=>$("#b"+n).style.borderColor=ok[i]?"var(--green)":"var(--red)");
+ if(ok.every(Boolean)){$("#codeFeedback").innerHTML="✓ Les cinq éléments sont corrects. Tu as relié la géométrie, le tri et le comptage au code Python.";mark("code")}
+ else $("#codeFeedback").innerHTML=`${ok.filter(Boolean).length}/5 corrects. Cherche d’abord la structure du couple <code>(distance, classe)</code> puis le rôle de <code>range(k)</code>.${codeAttempts>=2?" Tu peux afficher la solution si nécessaire.":""}`;
+});
+$("#showSolution").addEventListener("click",()=>{["2","2","sort","k","1"].forEach((v,i)=>$("#b"+(i+1)).value=v);$("#codeFeedback").textContent="Solution affichée : explique maintenant le rôle de chaque réponse avant de continuer.";});
+
+/* Practice engine */
+const questions=[
+ {d:"distance",q:"A(1,2) et B(4,6). Quelle est leur distance euclidienne ?",a:["5","7","√7","25"],ok:0,f:"Δx=3 et Δy=4 : √(3²+4²)=5. Repère le triangle 3-4-5."},
+ {d:"vote",q:"Avec k=5, les classes des voisins sont A, A, B, A, B. Quelle classe est prédite en vote uniforme ?",a:["A","B","égalité","impossible"],ok:0,f:"A obtient 3 voix et B 2. On compte seulement les k voisins retenus."},
+ {d:"vote",q:"Avec 2 classes, quel intérêt pratique a souvent un k impair ?",a:["Il accélère toujours le calcul","Il évite une égalité de nombre de voix","Il rend les distances entières","Il garantit une bonne précision"],ok:1,f:"Pour une classification binaire à vote uniforme, un nombre impair de voisins évite un partage exact des voix."},
+ {d:"scale",q:"Pourquoi normaliser peut être nécessaire avant KNN ?",a:["Pour rendre Python plus rapide","Pour éviter qu’une grande échelle numérique domine la distance","Pour supprimer les mauvaises classes","Pour toujours augmenter la précision"],ok:1,f:"KNN dépend directement des distances. Des unités d’amplitudes très différentes peuvent déformer la notion de proximité."},
+ {d:"eval",q:"Quel jeu doit rester à l’écart pendant le choix de k ?",a:["Le jeu de test","Le jeu d’apprentissage","Le jeu de validation","Aucun"],ok:0,f:"La validation sert au choix de paramètres. Le test doit rester indépendant pour l’évaluation finale."},
+ {d:"model",q:"Dans KNN de classification, qu’est-ce qu’une « classe » ?",a:["Une variable numérique d’entrée","L’étiquette que l’on cherche à prédire","Le nombre k","Une distance"],ok:1,f:"Les caractéristiques décrivent l’objet ; la classe est l’étiquette de sortie."},
+ {d:"code",q:"Pourquoi trier la liste des couples (distance, classe) ?",a:["Pour obtenir les plus petites distances en premier","Pour mélanger les classes","Pour supprimer les doublons","Pour calculer la moyenne"],ok:0,f:"Le tri permet ensuite de lire directement les k voisins les plus proches dans les premières positions."},
+ {d:"vote",q:"Avec un vote pondéré par 1/distance, quel voisin influence le plus ?",a:["Le plus éloigné","Le plus proche","Le premier de la table d’origine","Tous exactement pareil"],ok:1,f:"Plus d est petit, plus 1/d est grand : les voisins proches pèsent davantage."},
+ {d:"eval",q:"Une précision de 100 % sur les données d’apprentissage prouve-t-elle que le modèle généralisera ?",a:["Oui, toujours","Non","Seulement si k=1","Seulement avec 2 classes"],ok:1,f:"La performance sur les exemples déjà connus peut être trop optimiste. On évalue sur des données tenues à l’écart."},
+ {d:"model",q:"Dans l’implémentation naïve, avec n exemples de référence, combien de distances calcule-t-on pour une nouvelle cible ?",a:["1","k","n","n²"],ok:2,f:"On compare la cible à chacun des n exemples avant de classer les distances."}
+];
+let qi=0,score=0,answered=false,domainStats={model:[0,0],distance:[0,0],vote:[0,0],scale:[0,0],eval:[0,0],code:[0,0]};
+function renderPractice(){
+ const q=questions[qi];answered=false;$("#practiceCounter").textContent=`Question ${qi+1} / ${questions.length}`;$("#practiceScore").textContent=score;$("#practiceQ").textContent=q.q;$("#practiceFeedback").textContent="Choisis une réponse et justifie-la avant de cliquer.";$("#practiceNext").disabled=true;
+ $("#practiceAnswers").innerHTML=q.a.map((x,i)=>`<button class="answer" data-a="${i}">${x}</button>`).join("");
+ $$("#practiceAnswers .answer").forEach(b=>b.addEventListener("click",()=>answerPractice(Number(b.dataset.a),b)));renderDomains();
+}
+function answerPractice(i,b){
+ if(answered)return;answered=true;const q=questions[qi],buttons=$$("#practiceAnswers .answer");buttons[q.ok].classList.add("correct");if(i!==q.ok)b.classList.add("wrong");else score++;
+ domainStats[q.d][1]++;if(i===q.ok)domainStats[q.d][0]++;
+ $("#practiceScore").textContent=score;$("#practiceFeedback").innerHTML=(i===q.ok?"✓ <strong>Correct.</strong> ":"→ <strong>À retravailler.</strong> ")+q.f;$("#practiceNext").disabled=false;renderDomains();
+}
+function renderDomains(){
+ const names={model:"modèle",distance:"distance",vote:"k & vote",scale:"échelle",eval:"évaluation",code:"Python"};
+ $("#domainBars").innerHTML=Object.entries(names).map(([d,n])=>{const [ok,t]=domainStats[d],p=t?ok/t*100:0;return `<div class="domain"><div class="domain-head"><span>${n}</span><span>${t?ok+"/"+t:"—"}</span></div><div class="bar"><span style="width:${p}%"></span></div></div>`}).join("");
+}
+$("#practiceNext").addEventListener("click",()=>{if(qi<questions.length-1){qi++;renderPractice()}else{$("#practiceQ").textContent=`Bilan : ${score} / ${questions.length}`;$("#practiceAnswers").innerHTML="";$("#practiceFeedback").innerHTML=score>=8?"Maîtrise solide. Reviens maintenant au laboratoire et essaie d’expliquer une prédiction sans regarder la réponse.":"Repère les barres faibles à droite : elles indiquent exactement les notions à revoir.";$("#practiceNext").disabled=true}});
+$("#practiceRestart").addEventListener("click",()=>{qi=0;score=0;domainStats={model:[0,0],distance:[0,0],vote:[0,0],scale:[0,0],eval:[0,0],code:[0,0]};renderPractice()});
+
+/* Theme & reset */
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1700)}
+try{const th=localStorage.getItem("knnTheme");if(th)document.documentElement.dataset.theme=th}catch(e){}
+$("#themeBtn").addEventListener("click",()=>{const n=document.documentElement.dataset.theme==="dark"?"light":"dark";document.documentElement.dataset.theme=n;try{localStorage.setItem("knnTheme",n)}catch(e){}});
+$("#resetAll").addEventListener("click",()=>{Object.keys(mastery).forEach(k=>mastery[k]=false);saveMastery();toast("Progression réinitialisée")});
+
+renderWorked();renderLab();renderAccChart();renderPractice();
+})();
+</script>
+</body>
+</html>
